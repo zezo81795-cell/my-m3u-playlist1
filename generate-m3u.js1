@@ -1,0 +1,36 @@
+// generate-m3u.js
+// هذا السكريبت يقوم بتحويل رابط PNG إلى ملف M3U8 جاهز
+
+const https = require('https');
+const fs = require('fs');
+
+// الرابط الأصلي الذي يحتوي على بيانات m3u8
+const sourceUrl = 'https://iptvxa.com/live/8158170168/5400372327/4704.ts';
+
+// جلب البيانات من الرابط
+https.get(sourceUrl, (response) => {
+    let data = '';
+    
+    response.on('data', (chunk) => {
+        data += chunk;
+    });
+    
+    response.on('end', () => {
+        // تحويل المسارات النسبية إلى مسارات كاملة
+        let m3uContent = data;
+        const baseUrl = 'https://ostora.pages.dev/api/';
+        
+        // إضافة الرابط الكامل لكل مسار
+        m3uContent = m3uContent.replace(/(\d_\d+\.json\?[^\s]+)/g, (match) => {
+            return baseUrl + match;
+        });
+        
+        // حفظ الملف بصيغة m3u
+        fs.writeFileSync('playlist.m3u', m3uContent);
+        console.log('✅ تم إنشاء ملف playlist.m3u بنجاح!');
+        console.log('📁 يمكنك الآن استخدام الرابط:');
+        console.log('https://raw.githubusercontent.com/[اسم مستخدمك]/[اسم المستودع]/main/playlist.m3u');
+    });
+}).on('error', (err) => {
+    console.error('❌ خطأ في جلب البيانات:', err.message);
+});
