@@ -1,0 +1,27 @@
+name: تحديث قائمة التشغيل تلقائياً
+
+on:
+  schedule:
+    # يتشغل كل 6 ساعات (للتأكد من صلاحية الروابط)
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # يسمح بالتشغيل اليدوي
+
+jobs:
+  update-playlist:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: تشغيل السكريبت
+      run: node generate-m3u.js
+    
+    - name: رفع الملف المحدث
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: تحديث تلقائي لقائمة التشغيل
+        file_pattern: '*.m3u'
